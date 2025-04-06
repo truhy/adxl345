@@ -20,7 +20,7 @@
 	SOFTWARE.
 
 	Developer: Truong Hy
-	Version  : 20241220
+	Version  : 20250405
 	Target   : ARM Cortex-A9 on the DE10-Nano development board
 	           (Intel Cyclone V SoC FPGA)
 	Type     : Standalone C application
@@ -70,6 +70,7 @@
 // Rate and range options
 #define OPT_ADXL345_RATE              TRU_ADXL345_RATE_3P13_HZ  // See tru_adxl345_ll.h for the list of rates
 #define OPT_ADXL345_RANGE             TRU_ADXL345_RANGE_2G      // See tru_adxl345_ll.h for the list of ranges
+#define OPT_ADXL345_FULLRES           1                         // 0 = 10bit, 1 = fullres (2g = 10bit, 4g = 11bit, 8g = 12bit, 16g = 13bit)
 // Calibration offset options
 #define OPT_ADXL345_OFSX              0                         // OFFSETX = OFSX * 15.6mg
 #define OPT_ADXL345_OFSY              0                         // OFFSETY = OFSY * 15.6mg
@@ -153,7 +154,7 @@ void setup_adxl345(void){
 	// Set ADXL345 data options
 	TRU_ADXL345_DATA_FORMAT_PTR(buffer)->val = 0;
 	TRU_ADXL345_DATA_FORMAT_PTR(buffer)->bits.range = OPT_ADXL345_RANGE;
-	TRU_ADXL345_DATA_FORMAT_PTR(buffer)->bits.fullres = 1;
+	TRU_ADXL345_DATA_FORMAT_PTR(buffer)->bits.fullres = OPT_ADXL345_FULLRES;
 	TRU_ADXL345_DATA_FORMAT_PTR(buffer)->bits.intinvert = 1;
 	tru_adxl345_i2c_write(buffer, 1, TRU_ADXL345_DATA_FORMAT_ADDR);
 
@@ -189,6 +190,38 @@ void setup_adxl345(void){
 	tru_adxl345_i2c_write(buffer, 1, TRU_ADXL345_POWER_CTL_ADDR);
 }
 
+void disp_result(void){
+	uint32_t g_range;
+
+	// Determine 1g unit range
+	if(OPT_ADXL345_FULLRES){
+		// Res: +-2g = 10bit, +-4g = 11bit, +-8g = 12bit, +-16g = 13bit
+		switch(OPT_ADXL345_RANGE){
+			case TRU_ADXL345_RANGE_2G: g_range = 256; break;  // +-2g has a scale of 4g, so 1g range = res / scale = 2^10 / 4
+			case TRU_ADXL345_RANGE_4G: g_range = 256; break;  // +-4g has a scale of 8g, so 1g range = res / scale = 2^11 / 8
+			case TRU_ADXL345_RANGE_8G: g_range = 256; break;   // +-8g has a scale of 16g, so 1g range = res / scale = 2^12 / 16
+			case TRU_ADXL345_RANGE_16G: g_range = 256; break;  // +-16g has a scale of 32g, so 1g range = res / scale = 2^13 / 32
+			default:
+		}
+	}else{
+		// Res: 10bit
+		switch(OPT_ADXL345_RANGE){
+			case TRU_ADXL345_RANGE_2G: g_range = 256; break;  // +-2g has a scale of 4g, so 1g range = res / scale = 2^10 / 4
+			case TRU_ADXL345_RANGE_4G: g_range = 128; break;  // +-4g has a scale of 8g, so 1g range = res / scale = 2^10 / 8
+			case TRU_ADXL345_RANGE_8G: g_range = 64; break;   // +-8g has a scale of 16g, so 1g range = res / scale = 2^10 / 16
+			case TRU_ADXL345_RANGE_16G: g_range = 32; break;  // +-16g has a scale of 32g, so 1g range = res / scale = 2^10 / 32
+			default:
+		}
+	}
+
+	// Convert sample value to gravitational force
+	float xg = (float)accel.sample.x / g_range;
+	float yg = (float)accel.sample.y / g_range;
+	float zg = (float)accel.sample.z / g_range;
+
+	printf("%.10u: x=%i y=%i z=%i (%.2fg %.2fg %.2fg)\n", accel.sample_count, accel.sample.x, accel.sample.y, accel.sample.z, xg, yg, zg);
+}
+
 // Polling read method
 void poll_read(void){
 	tru_adxl345_int_source_t int_source;
@@ -215,7 +248,7 @@ void poll_read(void){
 		// Read out samples from ADXL345 FIFO
 		for(uint8_t i = 0; i < TRU_ADXL345_FIFO_STATUS_PTR(buffer)->bits.entries; i++){
 			tru_adxl345_i2c_read_bm(&accel.sample, 6, TRU_ADXL345_DATAX0_ADDR);
-			printf("%.10u: x=%-4i y=%-4i z=%-4i\n", accel.sample_count, accel.sample.x, accel.sample.y, accel.sample.z);
+			disp_result();
 			accel.sample_count++;
 		}
 #else
@@ -233,7 +266,7 @@ void poll_read(void){
 
 		// Read out samples
 		tru_adxl345_i2c_read_bm(&accel.sample, 6, TRU_ADXL345_DATAX0_ADDR);
-		printf("%.10u: x=%-4i y=%-4i z=%-4i\n", accel.sample_count, accel.sample.x, accel.sample.y, accel.sample.z);
+		disp_result();
 		accel.sample_count++;
 #endif
 	}
@@ -261,7 +294,7 @@ static void gpio2_irq_handler(void){
 		// Read out samples from ADXL345 FIFO
 		for(uint8_t i = 0; i < TRU_ADXL345_FIFO_STATUS_PTR(buffer)->bits.entries; i++){
 			tru_adxl345_i2c_read_bm(&accel.sample, 6, TRU_ADXL345_DATAX0_ADDR);
-			printf("%.10u: x=%-4i, y=%-4i, z=%-4i\n", accel.sample_count, accel.sample.x, accel.sample.y, accel.sample.z);
+			disp_result();
 			accel.sample_count++;
 		}
 	}
@@ -269,7 +302,7 @@ static void gpio2_irq_handler(void){
 	if(int_source.bits.dataready == 1){
 		// Read out samples
 		tru_adxl345_i2c_read_bm(&accel.sample, 6, TRU_ADXL345_DATAX0_ADDR);
-		printf("%.10u: x=%-4i, y=%-4i, z=%-4i\n", accel.sample_count, accel.sample.x, accel.sample.y, accel.sample.z);
+		disp_result();
 		accel.sample_count++;
 	}
 #endif

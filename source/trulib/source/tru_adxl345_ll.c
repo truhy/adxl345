@@ -21,10 +21,13 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20241222
+	Version: 20250404
 */
 
 #include "tru_adxl345_ll.h"
+
+#if(TRU_TARGET == TRU_TARGET_C5SOC)
+
 #include "tru_util_ll.h"
 #include "tru_c5soc_hps_ll.h"
 #include "tru_c5soc_hps_i2c_ll.h"
@@ -38,7 +41,7 @@ void tru_adxl345_i2c_init(uint32_t l4_sp_clk_freq_hz, uint32_t i2c_dev_speed_khz
 	TRU_HPS_I2C0_IC_ENABLE_REG->bits.enable = 0;
 
 	// Setup defaults
-	tru_hps_i2c_ic_con_var_t con = { .val = TRU_HPS_I2C0_IC_CON_REG->val };
+	tru_hps_i2c_ic_con_t con = { .val = TRU_HPS_I2C0_IC_CON_REG->val };
 	con.bits.master_mode = TRU_HPS_I2C_CON_MASTER_ENABLE;
 	con.bits.speed = TRU_HPS_I2C_CON_SPEED_100K;
 	con.bits.ic_10bitaddr_slave = TRU_HPS_I2C_CON_ADDR_7BIT;
@@ -102,7 +105,7 @@ void tru_adxl345_i2c_init(uint32_t l4_sp_clk_freq_hz, uint32_t i2c_dev_speed_khz
 // Read data using HPS I2C0 controller
 void tru_adxl345_i2c_read_bm(void *buf, uint32_t len, uint32_t reg_addr_start){
 	uint8_t *buf8 = buf;
-	tru_hps_i2c_ic_data_cmd_var_t data_cmd = { .val = 0 };
+	tru_hps_i2c_ic_data_cmd_t data_cmd = { .val = 0 };
 	uint8_t txremain;
 	uint8_t rxremain;
 
@@ -151,7 +154,7 @@ void tru_adxl345_i2c_read_bm(void *buf, uint32_t len, uint32_t reg_addr_start){
 // Read data using HPS I2C0 controller
 void tru_adxl345_i2c_read(void *buf, uint32_t len, uint32_t reg_addr_start){
 	uint8_t *buf8 = buf;
-	tru_hps_i2c_ic_data_cmd_var_t data_cmd = { .val = 0 };
+	tru_hps_i2c_ic_data_cmd_t data_cmd = { .val = 0 };
 
 	// Send write command and register address
 	while(TRU_HPS_I2C0_IC_STATUS_REG->bits.tfnf == 0);  // Ensure TXFIFO is not full
@@ -183,7 +186,7 @@ void tru_adxl345_i2c_read(void *buf, uint32_t len, uint32_t reg_addr_start){
 // Write data using HPS I2C0 controller
 void tru_adxl345_i2c_write(void *buf, uint32_t len, uint32_t reg_addr_start){
 	uint8_t *buf8 = buf;
-	tru_hps_i2c_ic_data_cmd_var_t data_cmd = { .val = 0 };
+	tru_hps_i2c_ic_data_cmd_t data_cmd = { .val = 0 };
 
 	// Send write command and register address
 	while(TRU_HPS_I2C0_IC_STATUS_REG->bits.tfnf == 0);  // Ensure TXFIFO is not full
@@ -215,3 +218,5 @@ void tru_adxl345_i2c_stop_flush_fifo(void){
 	TRU_ADXL345_FIFO_CTL_PTR(buf)->bits.fifomode = TRU_ADXL345_FIFOMODE_BYPASS;
 	tru_adxl345_i2c_write(buf, 1, TRU_ADXL345_FIFO_CTL_ADDR);
 }
+
+#endif

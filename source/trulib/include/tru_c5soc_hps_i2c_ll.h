@@ -21,7 +21,7 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20250405
+	Version: 20250407
 
 	Low-level code for Cyclone V SoC HPS I2C controller.
 */
@@ -32,6 +32,8 @@
 #include "tru_config.h"
 
 #if(TRU_TARGET == TRU_TARGET_C5SOC)
+
+#include <stdint.h>
 
 // =====================================================================
 // Intel Cyclone V SoC FPGA (Synopsys I2C controller) specific registers

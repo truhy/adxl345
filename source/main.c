@@ -20,9 +20,9 @@
 	SOFTWARE.
 
 	Developer: Truong Hy
-	Version  : 20250405
-	Target   : ARM Cortex-A9 on the DE10-Nano development board
-	           (Intel Cyclone V SoC FPGA)
+	Version  : 20251209
+	Target   : ARM Cortex-A9 on the DE10-Nano Kit development board (Altera
+	           Cyclone V SoC FPGA)
 	Type     : Standalone C application
 
 	An example standalone program demonstrating the readout of the 3-axis digital
@@ -54,13 +54,11 @@
 #include CMSIS_device_header  // CMSIS
 
 // Trulib includes
-#include "tru_c5soc_hps_i2c_ll.h"
-#include "tru_c5soc_hps_gpio_ll.h"
-#include "tru_adxl345_ll.h"
+#include "c5soc/tru_c5soc_hps_clkmgr_ll.h"
+#include "c5soc/tru_c5soc_hps_i2c_ll.h"
+#include "c5soc/tru_c5soc_hps_gpio_ll.h"
+#include "c5soc/tru_adxl345_ll.h"
 #include "tru_logger.h"
-
-// Intel HWLIB includes
-#include "alt_clock_manager.h"
 
 // Interrupt options
 #define OPT_ADXL345_INT1_ENABLE       0                         // 0 = polling mode, 1 = interrupt via INT1 pin
@@ -86,8 +84,11 @@
 #define OPT_ADXL345_TAP_LAT           0x3   // LATENT = LAT * 1.25ms
 #define OPT_ADXL345_TAP_WIN           0x50  // WINDOW = WIN * 1.25ms
 
-// DE10-Nano specific setting
+// DE10-Nano specific GPIO pin number
 #define DE10N_ADXL345_INT1_GPIO_PINNUM 61
+
+// Convert to pin number register bit shift
+#define DE10N_ADXL345_INT1_GPIO_PINNUM_BIT TRU_HPS_GPIO2_PINUM_TO_BITPOS(DE10N_ADXL345_INT1_GPIO_PINNUM)
 
 uint8_t buffer[1];
 
@@ -109,7 +110,7 @@ void setup_adxl345(void){
 	accel.sample_count = 0;
 
 	// Get the L4 Slave Peripheral clock frequency
-	alt_clk_freq_get(ALT_CLK_L4_SP, &accel.l4_sp_clock_freq_hz);
+	accel.l4_sp_clock_freq_hz = get_l4_sp_clk(TRU_HPS_INPUT_CLK_HZ).fout;
 	//printf("L4_SP_CLK = %u Hz\n", accel.l4_sp_clock_freq_hz);
 
 	// Initialise
@@ -310,9 +311,9 @@ static void gpio2_irq_handler(void){
 
 // Setup ADXL345 INT1 pin
 void setup_adxl345_int1_pin(void){
-	tru_hps_gpio2_ll_reset_release();
-	tru_hps_gpio2_ll_set_pin_input(DE10N_ADXL345_INT1_GPIO_PINNUM);  // Set ADXL345 INT1 GPIO as input mode
-	tru_hps_gpio2_ll_int_enable(DE10N_ADXL345_INT1_GPIO_PINNUM);     // Enable interrupt on ADXL345 INT1 GPIO
+	tru_hps_gpio_ll_reset_release((void *)TRU_HPS_GPIO2_BASE);
+	tru_hps_gpio_ll_set_pin_input((void *)TRU_HPS_GPIO2_BASE, DE10N_ADXL345_INT1_GPIO_PINNUM_BIT);  // Set ADXL345 INT1 GPIO as input mode
+	tru_hps_gpio_ll_int_enable((void *)TRU_HPS_GPIO2_BASE, DE10N_ADXL345_INT1_GPIO_PINNUM_BIT);     // Enable interrupt on ADXL345 INT1 GPIO
 
 	irq_mask(0);  // Enable IRQ mode interrupts for this CPU
 	IRQ_SetHandler(C5SOC_GPIO2_IRQn, gpio2_irq_handler);  // Register user interrupt handler

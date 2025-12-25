@@ -28,7 +28,7 @@
 
 #if(TRU_TARGET == TRU_TARGET_C5SOC)
 
-#include "tru_util_ll.h"
+#include "tru_iom.h"
 #include "c5soc/tru_c5soc_hps_rstmgr_ll.h"
 #include "c5soc/tru_c5soc_hps_i2c_ll.h"
 

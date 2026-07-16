@@ -20,7 +20,7 @@
 	SOFTWARE.
 
 	Developer: Truong Hy
-	Version  : 20251209
+	Version  : 20260707
 	Target   : ARM Cortex-A9 on the DE10-Nano Kit development board (Altera
 	           Cyclone V SoC FPGA)
 	Type     : Standalone C application
@@ -54,10 +54,10 @@
 #include CMSIS_device_header  // CMSIS
 
 // Trulib includes
-#include "c5soc/tru_c5soc_hps_clkmgr_ll.h"
-#include "c5soc/tru_c5soc_hps_i2c_ll.h"
-#include "c5soc/tru_c5soc_hps_gpio_ll.h"
-#include "c5soc/tru_adxl345_ll.h"
+#include "c5soc/tru_clkmgr_c5soc.h"
+#include "c5soc/tru_i2c_c5soc.h"
+#include "c5soc/tru_gpio_c5soc.h"
+#include "c5soc/tru_adxl345.h"
 #include "tru_logger.h"
 
 // Interrupt options
@@ -311,9 +311,9 @@ static void gpio2_irq_handler(void){
 
 // Setup ADXL345 INT1 pin
 void setup_adxl345_int1_pin(void){
-	tru_hps_gpio_ll_reset_release((void *)TRU_HPS_GPIO2_BASE);
-	tru_hps_gpio_ll_set_pin_input((void *)TRU_HPS_GPIO2_BASE, DE10N_ADXL345_INT1_GPIO_PINNUM_BIT);  // Set ADXL345 INT1 GPIO as input mode
-	tru_hps_gpio_ll_int_enable((void *)TRU_HPS_GPIO2_BASE, DE10N_ADXL345_INT1_GPIO_PINNUM_BIT);     // Enable interrupt on ADXL345 INT1 GPIO
+	tru_hps_gpio_reset_release((void *)TRU_HPS_GPIO2_BASE);
+	tru_hps_gpio_set_pin_input((void *)TRU_HPS_GPIO2_BASE, DE10N_ADXL345_INT1_GPIO_PINNUM_BIT);  // Set ADXL345 INT1 GPIO as input mode
+	tru_hps_gpio_int_enable((void *)TRU_HPS_GPIO2_BASE, DE10N_ADXL345_INT1_GPIO_PINNUM_BIT);     // Enable interrupt on ADXL345 INT1 GPIO
 
 	irq_mask(0);  // Enable IRQ mode interrupts for this CPU
 	IRQ_SetHandler(C5SOC_GPIO2_IRQn, gpio2_irq_handler);  // Register user interrupt handler
@@ -323,6 +323,8 @@ void setup_adxl345_int1_pin(void){
 }
 
 int main(void){
+	tru_bsp_init();
+	
 	printf("ADXL345 accelerometer example\n");
 
 	setup_adxl345();

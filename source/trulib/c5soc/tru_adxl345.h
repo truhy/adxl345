@@ -21,15 +21,19 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20250404
+	Version: 20260208
 */
 
-#ifndef TRU_ADXL345_LL_H
-#define TRU_ADXL345_LL_H
+#ifndef TRU_ADXL345_H
+#define TRU_ADXL345_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "tru_config.h"
 
-#if(TRU_TARGET == TRU_TARGET_C5SOC)
+#if defined(TRU_CFG_CHIPSET) && TRU_CFG_CHIPSET == TRU_OPT_CHIPSET_C5SOC
 
 #include <stdint.h>
 
@@ -267,6 +271,10 @@ void tru_adxl345_i2c_read(void *buf, uint32_t len, uint32_t reg_addr_start);
 void tru_adxl345_i2c_write(void *buf, uint32_t len, uint32_t reg_addr_start);
 void tru_adxl345_i2c_stop_flush_fifo(void);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

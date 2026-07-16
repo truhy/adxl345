@@ -21,17 +21,21 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20250407
+	Version: 20260208
 
-	Low-level code for Cyclone V SoC HPS I2C controller.
+	I2C controller (Synopsys I2C controller) low-level support for Cyclone V SoC HPS.
 */
 
-#ifndef TRU_C5SOC_HPS_I2C_LL_H
-#define TRU_C5SOC_HPS_I2C_LL_H
+#ifndef TRU_I2C_C5SOC_H
+#define TRU_I2C_C5SOC_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "tru_config.h"
 
-#if(TRU_TARGET == TRU_TARGET_C5SOC)
+#if defined(TRU_CFG_CHIPSET) && TRU_CFG_CHIPSET == TRU_OPT_CHIPSET_C5SOC
 
 #include <stdint.h>
 
@@ -42,20 +46,20 @@
 #define TRU_HPS_I2C_TXFIFO_DEPTH 64
 #define TRU_HPS_I2C_RXFIFO_DEPTH 64
 
-#define TRU_HPS_I2C_CON_MASTER_ENABLE   0x1U
-#define TRU_HPS_I2C_CON_MASTER_DISABLE  0x0U
-#define TRU_HPS_I2C_CON_SPEED_100K      0x1U
-#define TRU_HPS_I2C_CON_SPEED_400K      0x2U
-#define TRU_HPS_I2C_CON_ADDR_7BIT       0x0U
-#define TRU_HPS_I2C_CON_ADDR_10BIT      0x1U
-#define TRU_HPS_I2C_CON_RESTART_ENABLE  0x1U
-#define TRU_HPS_I2C_CON_RESTART_DISABLE 0x0U
-#define TRU_HPS_I2C_CON_SLAVE_ENABLE    0x0U
-#define TRU_HPS_I2C_CON_SLAVE_DISABLE   0x1U
+#define TRU_HPS_I2C_CON_MASTER_ENABLE   0x1
+#define TRU_HPS_I2C_CON_MASTER_DISABLE  0x0
+#define TRU_HPS_I2C_CON_SPEED_100K      0x1
+#define TRU_HPS_I2C_CON_SPEED_400K      0x2
+#define TRU_HPS_I2C_CON_ADDR_7BIT       0x0
+#define TRU_HPS_I2C_CON_ADDR_10BIT      0x1
+#define TRU_HPS_I2C_CON_RESTART_ENABLE  0x1
+#define TRU_HPS_I2C_CON_RESTART_DISABLE 0x0
+#define TRU_HPS_I2C_CON_SLAVE_ENABLE    0x0
+#define TRU_HPS_I2C_CON_SLAVE_DISABLE   0x1
 
-#define TRU_HPS_I2C_INTR_MASK_ENABLE_ALL 0xfffU
+#define TRU_HPS_I2C_INTR_MASK_ENABLE_ALL 0xfff
 
-#define TRU_HPS_I2C_CLR_INTR_ALL 0xfffU
+#define TRU_HPS_I2C_CLR_INTR_ALL 0xfff
 
 #define TRU_HPS_I2C_DATA_CMD_MASTER_READ       0x1
 #define TRU_HPS_I2C_DATA_CMD_MASTER_WRITE      0x0
@@ -65,50 +69,50 @@
 #define TRU_HPS_I2C_DATA_CMD_ISSUE_RESTART_NO  0x0
 
 // Generic
-#define TRU_HPS_I2C_IC_CON_OFFSET                0x0U
-#define TRU_HPS_I2C_IC_TAR_OFFSET                0x4U
-#define TRU_HPS_I2C_IC_SAR_OFFSET                0x8U
-#define TRU_HPS_I2C_IC_DATA_CMD_OFFSET           0x10U
-#define TRU_HPS_I2C_IC_SS_SCL_HCNT_OFFSET        0x14U
-#define TRU_HPS_I2C_IC_SS_SCL_LCNT_OFFSET        0x18U
-#define TRU_HPS_I2C_IC_FS_SCL_HCNT_OFFSET        0x1cU
-#define TRU_HPS_I2C_IC_FS_SCL_LCNT_OFFSET        0x20U
-#define TRU_HPS_I2C_IC_INTR_STAT_OFFSET          0x2cU
-#define TRU_HPS_I2C_IC_INTR_MASK_OFFSET          0x30U
-#define TRU_HPS_I2C_IC_RAW_INTR_STAT_OFFSET      0x34U
-#define TRU_HPS_I2C_IC_RX_TL_OFFSET              0x38U
-#define TRU_HPS_I2C_IC_TX_TL_OFFSET              0x3cU
-#define TRU_HPS_I2C_IC_CLR_INTR_OFFSET           0x40U
-#define TRU_HPS_I2C_IC_CLR_RX_UNDER_OFFSET       0x44U
-#define TRU_HPS_I2C_IC_CLR_RX_OVER_OFFSET        0x48U
-#define TRU_HPS_I2C_IC_CLR_TX_OVER_OFFSET        0x4cU
-#define TRU_HPS_I2C_IC_CLR_RD_REQ_OFFSET         0x50U
-#define TRU_HPS_I2C_IC_CLR_TX_ABRT_OFFSET        0x54U
-#define TRU_HPS_I2C_IC_CLR_RX_DONE_OFFSET        0x58U
-#define TRU_HPS_I2C_IC_CLR_ACTIVITY_OFFSET       0x5cU
-#define TRU_HPS_I2C_IC_CLR_STOP_DET_OFFSET       0x60U
-#define TRU_HPS_I2C_IC_CLR_START_DET_OFFSET      0x64U
-#define TRU_HPS_I2C_IC_CLR_GEN_CALL_OFFSET       0x68U
-#define TRU_HPS_I2C_IC_ENABLE_OFFSET             0x6cU
-#define TRU_HPS_I2C_IC_STATUS_OFFSET             0x70U
-#define TRU_HPS_I2C_IC_TXFLR_OFFSET              0x74U
-#define TRU_HPS_I2C_IC_RXFLR_OFFSET              0x78U
-#define TRU_HPS_I2C_IC_SDA_HOLD_OFFSET           0x7cU
-#define TRU_HPS_I2C_IC_ABRT_SOURCE_OFFSET        0x80U
-#define TRU_HPS_I2C_IC_SLV_DATA_NACK_ONLY_OFFSET 0x84U
-#define TRU_HPS_I2C_IC_DMA_CR_OFFSET             0x88U
-#define TRU_HPS_I2C_IC_DMA_TDLR_OFFSET           0x8cU
-#define TRU_HPS_I2C_IC_DMA_RDLR_OFFSET           0x90U
-#define TRU_HPS_I2C_IC_SDA_SETUP_OFFSET          0x94U
-#define TRU_HPS_I2C_IC_ACK_GENERAL_CALL_OFFSET   0x98U
-#define TRU_HPS_I2C_IC_ENABLE_STATUS_OFFSET      0x9cU
-#define TRU_HPS_I2C_IC_FS_SPKLEN_OFFSET          0xa0U
-#define TRU_HPS_I2C_IC_COMP_PARAM_1_OFFSET       0xf4U
-#define TRU_HPS_I2C_IC_COMP_VERSION_OFFSET       0xf8U
-#define TRU_HPS_I2C_IC_COMP_TYPE_OFFSET          0xfcU
+#define TRU_HPS_I2C_IC_CON_OFFSET                0x0
+#define TRU_HPS_I2C_IC_TAR_OFFSET                0x4
+#define TRU_HPS_I2C_IC_SAR_OFFSET                0x8
+#define TRU_HPS_I2C_IC_DATA_CMD_OFFSET           0x10
+#define TRU_HPS_I2C_IC_SS_SCL_HCNT_OFFSET        0x14
+#define TRU_HPS_I2C_IC_SS_SCL_LCNT_OFFSET        0x18
+#define TRU_HPS_I2C_IC_FS_SCL_HCNT_OFFSET        0x1c
+#define TRU_HPS_I2C_IC_FS_SCL_LCNT_OFFSET        0x20
+#define TRU_HPS_I2C_IC_INTR_STAT_OFFSET          0x2c
+#define TRU_HPS_I2C_IC_INTR_MASK_OFFSET          0x30
+#define TRU_HPS_I2C_IC_RAW_INTR_STAT_OFFSET      0x34
+#define TRU_HPS_I2C_IC_RX_TL_OFFSET              0x38
+#define TRU_HPS_I2C_IC_TX_TL_OFFSET              0x3c
+#define TRU_HPS_I2C_IC_CLR_INTR_OFFSET           0x40
+#define TRU_HPS_I2C_IC_CLR_RX_UNDER_OFFSET       0x44
+#define TRU_HPS_I2C_IC_CLR_RX_OVER_OFFSET        0x48
+#define TRU_HPS_I2C_IC_CLR_TX_OVER_OFFSET        0x4c
+#define TRU_HPS_I2C_IC_CLR_RD_REQ_OFFSET         0x50
+#define TRU_HPS_I2C_IC_CLR_TX_ABRT_OFFSET        0x54
+#define TRU_HPS_I2C_IC_CLR_RX_DONE_OFFSET        0x58
+#define TRU_HPS_I2C_IC_CLR_ACTIVITY_OFFSET       0x5c
+#define TRU_HPS_I2C_IC_CLR_STOP_DET_OFFSET       0x60
+#define TRU_HPS_I2C_IC_CLR_START_DET_OFFSET      0x64
+#define TRU_HPS_I2C_IC_CLR_GEN_CALL_OFFSET       0x68
+#define TRU_HPS_I2C_IC_ENABLE_OFFSET             0x6c
+#define TRU_HPS_I2C_IC_STATUS_OFFSET             0x70
+#define TRU_HPS_I2C_IC_TXFLR_OFFSET              0x74
+#define TRU_HPS_I2C_IC_RXFLR_OFFSET              0x78
+#define TRU_HPS_I2C_IC_SDA_HOLD_OFFSET           0x7c
+#define TRU_HPS_I2C_IC_ABRT_SOURCE_OFFSET        0x80
+#define TRU_HPS_I2C_IC_SLV_DATA_NACK_ONLY_OFFSET 0x84
+#define TRU_HPS_I2C_IC_DMA_CR_OFFSET             0x88
+#define TRU_HPS_I2C_IC_DMA_TDLR_OFFSET           0x8c
+#define TRU_HPS_I2C_IC_DMA_RDLR_OFFSET           0x90
+#define TRU_HPS_I2C_IC_SDA_SETUP_OFFSET          0x94
+#define TRU_HPS_I2C_IC_ACK_GENERAL_CALL_OFFSET   0x98
+#define TRU_HPS_I2C_IC_ENABLE_STATUS_OFFSET      0x9c
+#define TRU_HPS_I2C_IC_FS_SPKLEN_OFFSET          0xa0
+#define TRU_HPS_I2C_IC_COMP_PARAM_1_OFFSET       0xf4
+#define TRU_HPS_I2C_IC_COMP_VERSION_OFFSET       0xf8
+#define TRU_HPS_I2C_IC_COMP_TYPE_OFFSET          0xfc
 
 // HPS I2C0 registers
-#define TRU_HPS_I2C0_BASE                       0xffc04000UL
+#define TRU_HPS_I2C0_BASE                       0xffc04000
 #define TRU_HPS_I2C0_IC_CON_ADDR                (TRU_HPS_I2C0_BASE + TRU_HPS_I2C_IC_CON_OFFSET)
 #define TRU_HPS_I2C0_IC_TAR_ADDR                (TRU_HPS_I2C0_BASE + TRU_HPS_I2C_IC_TAR_OFFSET)
 #define TRU_HPS_I2C0_IC_SAR_ADDR                (TRU_HPS_I2C0_BASE + TRU_HPS_I2C_IC_SAR_OFFSET)
@@ -150,7 +154,7 @@
 #define TRU_HPS_I2C0_IC_COMP_TYPE_ADDR          (TRU_HPS_I2C0_BASE + TRU_HPS_I2C_IC_COMP_TYPE_OFFSET)
 
 // HPS I2C1 registers
-#define TRU_HPS_I2C1_BASE                       0xffc05000UL
+#define TRU_HPS_I2C1_BASE                       0xffc05000
 #define TRU_HPS_I2C1_IC_CON_ADDR                (TRU_HPS_I2C1_BASE + TRU_HPS_I2C_IC_CON_OFFSET)
 #define TRU_HPS_I2C1_IC_TAR_ADDR                (TRU_HPS_I2C1_BASE + TRU_HPS_I2C_IC_TAR_OFFSET)
 #define TRU_HPS_I2C1_IC_SAR_ADDR                (TRU_HPS_I2C1_BASE + TRU_HPS_I2C_IC_SAR_OFFSET)
@@ -192,7 +196,7 @@
 #define TRU_HPS_I2C1_IC_COMP_TYPE_ADDR          (TRU_HPS_I2C1_BASE + TRU_HPS_I2C_IC_COMP_TYPE_OFFSET)
 
 // HPS I2C2 registers
-#define TRU_HPS_I2C2_BASE                       0xffc06000UL
+#define TRU_HPS_I2C2_BASE                       0xffc06000
 #define TRU_HPS_I2C2_IC_CON_ADDR                (TRU_HPS_I2C2_BASE + TRU_HPS_I2C_IC_CON_OFFSET)
 #define TRU_HPS_I2C2_IC_TAR_ADDR                (TRU_HPS_I2C2_BASE + TRU_HPS_I2C_IC_TAR_OFFSET)
 #define TRU_HPS_I2C2_IC_SAR_ADDR                (TRU_HPS_I2C2_BASE + TRU_HPS_I2C_IC_SAR_OFFSET)
@@ -234,7 +238,7 @@
 #define TRU_HPS_I2C2_IC_COMP_TYPE_ADDR          (TRU_HPS_I2C2_BASE + TRU_HPS_I2C_IC_COMP_TYPE_OFFSET)
 
 // HPS I2C3 registers
-#define TRU_HPS_I2C3_BASE                       0xffc07000UL
+#define TRU_HPS_I2C3_BASE                       0xffc07000
 #define TRU_HPS_I2C3_IC_CON_ADDR                (TRU_HPS_I2C3_BASE + TRU_HPS_I2C_IC_CON_OFFSET)
 #define TRU_HPS_I2C3_IC_TAR_ADDR                (TRU_HPS_I2C3_BASE + TRU_HPS_I2C_IC_TAR_OFFSET)
 #define TRU_HPS_I2C3_IC_SAR_ADDR                (TRU_HPS_I2C3_BASE + TRU_HPS_I2C_IC_SAR_OFFSET)
@@ -953,6 +957,10 @@ typedef union{
 #define TRU_HPS_I2C2_IC_COMP_TYPE_REG               ((volatile tru_hps_i2c_ic_comp_type_reg_t *const)((char *)TRU_HPS_I2C2_BASE + TRU_HPS_I2C_IC_COMP_TYPE_OFFSET))
 #define TRU_HPS_I2C3_IC_COMP_TYPE_REG               ((volatile tru_hps_i2c_ic_comp_type_reg_t *const)((char *)TRU_HPS_I2C3_BASE + TRU_HPS_I2C_IC_COMP_TYPE_OFFSET))
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

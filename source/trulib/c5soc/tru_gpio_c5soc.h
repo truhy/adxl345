@@ -21,7 +21,7 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20251209
+	Version: 20260208
 
 	Low-level code for Cyclone V SoC HPS GPIO controller module.
 
@@ -36,14 +36,18 @@
 	58 to 66            | GPIO2
 */
 
-#ifndef TRU_C5SOC_HPS_GPIO_LL_H
-#define TRU_C5SOC_HPS_GPIO_LL_H
+#ifndef TRU_GPIO_C5SOC_H
+#define TRU_GPIO_C5SOC_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "tru_config.h"
 
-#if(TRU_TARGET == TRU_TARGET_C5SOC)
+#if defined(TRU_CFG_CHIPSET) && TRU_CFG_CHIPSET == TRU_OPT_CHIPSET_C5SOC
 
-#include "c5soc/tru_c5soc_hps_rstmgr_ll.h"
+#include "c5soc/tru_rstmgr_c5soc.h"
 #include <stdint.h>
 
 // ==================
@@ -51,14 +55,14 @@
 // ==================
 
 // Hardware HPS GPIO module registers
-#define TRU_HPS_GPIO0_BASE 0xff708000UL
-#define TRU_HPS_GPIO1_BASE 0xff709000UL
-#define TRU_HPS_GPIO2_BASE 0xff70a000UL
+#define TRU_HPS_GPIO0_BASE 0xff708000
+#define TRU_HPS_GPIO1_BASE 0xff709000
+#define TRU_HPS_GPIO2_BASE 0xff70a000
 
 // First pin number of each GPIO group
-#define TRU_HPS_GPIO0_FIRST_PINNUM 0U
-#define TRU_HPS_GPIO1_FIRST_PINNUM 29U
-#define TRU_HPS_GPIO2_FIRST_PINNUM 58U
+#define TRU_HPS_GPIO0_FIRST_PINNUM 0
+#define TRU_HPS_GPIO1_FIRST_PINNUM 29
+#define TRU_HPS_GPIO2_FIRST_PINNUM 58
 
 // For converting pin number to pin number register bit position shift
 #define TRU_HPS_GPIO0_PINUM_TO_BITPOS(pinnum) (pinnum - TRU_HPS_GPIO0_FIRST_PINNUM)
@@ -102,7 +106,7 @@ typedef struct{
 // HPS GPIO functions
 // ==================
 
-static inline void tru_hps_gpio_ll_reset_release(void *gpio_base){
+static inline void tru_hps_gpio_reset_release(void *gpio_base){
 	// Release GPIO0 module from reset state, i.e. enable it (1 = hold in reset, 0 = release)
 	switch((uint32_t)gpio_base){
 		case TRU_HPS_GPIO0_BASE: TRU_HPS_RSTMGR_PERMODRST_REG->bits.gpio0 = 0; break;
@@ -112,7 +116,7 @@ static inline void tru_hps_gpio_ll_reset_release(void *gpio_base){
 	}
 }
 
-static inline void tru_hps_gpio_ll_reset_hold(void *gpio_base){
+static inline void tru_hps_gpio_reset_hold(void *gpio_base){
 	// Hold GPIO0 module in reset state, i.e. enable it (1 = hold in reset, 0 = release)
 	switch((uint32_t)gpio_base){
 		case TRU_HPS_GPIO0_BASE: TRU_HPS_RSTMGR_PERMODRST_REG->bits.gpio0 = 1; break;
@@ -122,78 +126,82 @@ static inline void tru_hps_gpio_ll_reset_hold(void *gpio_base){
 	}
 }
 
-static inline void tru_hps_gpio_ll_set_pin_output(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->dir |= 1U << pinnum_bitpos;
+static inline void tru_hps_gpio_set_pin_output(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->dir |= 1 << pinnum_bitpos;
 }
 
-static inline void tru_hps_gpio_ll_set_pin_input(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->dir &= ~(1U << pinnum_bitpos);
+static inline void tru_hps_gpio_set_pin_input(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->dir &= ~(1 << pinnum_bitpos);
 }
 
-static inline void tru_hps_gpio_ll_set_pin_debounce(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->debounce |= 1U << pinnum_bitpos;
+static inline void tru_hps_gpio_set_pin_debounce(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->debounce |= 1 << pinnum_bitpos;
 }
 
-static inline void tru_hps_gpio_ll_set_pin_nodebounce(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->debounce &= ~(1U << pinnum_bitpos);
+static inline void tru_hps_gpio_set_pin_nodebounce(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->debounce &= ~(1 << pinnum_bitpos);
 }
 
-static inline void tru_hps_gpio_ll_set_pin_high(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->port_wr |= 1U << pinnum_bitpos;
+static inline void tru_hps_gpio_set_pin_high(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->port_wr |= 1 << pinnum_bitpos;
 }
 
-static inline void tru_hps_gpio_ll_set_pin_low(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->port_wr &= ~(1U << pinnum_bitpos);
+static inline void tru_hps_gpio_set_pin_low(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->port_wr &= ~(1 << pinnum_bitpos);
 }
 
-static inline void tru_hps_gpio_ll_set_pin_state(void *gpio_base, uint32_t pinnum_bitpos, tru_hps_gpio_pinstate_t state){
+static inline void tru_hps_gpio_set_pin_state(void *gpio_base, uint32_t pinnum_bitpos, tru_hps_gpio_pinstate_t state){
 	if(state == TRU_HPS_GPIO_PIN_LOW){
-		TRU_HPS_GPIO_REG(gpio_base)->port_wr &= ~(1U << pinnum_bitpos);
+		TRU_HPS_GPIO_REG(gpio_base)->port_wr &= ~(1 << pinnum_bitpos);
 	}else{
-		TRU_HPS_GPIO_REG(gpio_base)->port_wr |= 1U << pinnum_bitpos;
+		TRU_HPS_GPIO_REG(gpio_base)->port_wr |= 1 << pinnum_bitpos;
 	}
 }
 
-static inline void tru_hps_gpio_ll_toggle_pin(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->port_wr ^= 1U << pinnum_bitpos;
+static inline void tru_hps_gpio_toggle_pin(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->port_wr ^= 1 << pinnum_bitpos;
 }
 
-static inline uint32_t tru_hps_gpio_ll_get_pin(void *gpio_base, uint32_t pinnum_bitpos){
-	return TRU_HPS_GPIO_REG(gpio_base)->port_rd & (1U << pinnum_bitpos);
+static inline uint32_t tru_hps_gpio_get_pin(void *gpio_base, uint32_t pinnum_bitpos){
+	return TRU_HPS_GPIO_REG(gpio_base)->port_rd & (1 << pinnum_bitpos);
 }
 
-static inline tru_hps_gpio_pinstate_t tru_hps_gpio_ll_get_pin_state(void *gpio_base, uint32_t pinnum_bitpos){
-	return (TRU_HPS_GPIO_REG(gpio_base)->port_rd & (1U << pinnum_bitpos)) ? TRU_HPS_GPIO_PIN_HIGH : TRU_HPS_GPIO_PIN_LOW;
+static inline tru_hps_gpio_pinstate_t tru_hps_gpio_get_pin_state(void *gpio_base, uint32_t pinnum_bitpos){
+	return (TRU_HPS_GPIO_REG(gpio_base)->port_rd & (1 << pinnum_bitpos)) ? TRU_HPS_GPIO_PIN_HIGH : TRU_HPS_GPIO_PIN_LOW;
 }
 
-static inline void tru_hps_gpio_ll_int_enable(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->inten |= 1U << pinnum_bitpos;
+static inline void tru_hps_gpio_int_enable(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->inten |= 1 << pinnum_bitpos;
 }
 
-static inline void tru_hps_gpio_ll_int_disable(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->inten &= ~(1U << pinnum_bitpos);
+static inline void tru_hps_gpio_int_disable(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->inten &= ~(1 << pinnum_bitpos);
 }
 
-static inline void tru_hps_gpio_ll_edge_level(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->inttype_level |= 1U << pinnum_bitpos;  // Select edge sensitive interrupt (1 = edge, 0 = level)
+static inline void tru_hps_gpio_edge_level(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->inttype_level |= 1 << pinnum_bitpos;  // Select edge sensitive interrupt (1 = edge, 0 = level)
 }
 
-static inline void tru_hps_gpio_ll_level(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->inttype_level &= ~(1U << pinnum_bitpos);  // Select level sensitive interrupt (1 = edge, 0 = level)
+static inline void tru_hps_gpio_level(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->inttype_level &= ~(1 << pinnum_bitpos);  // Select level sensitive interrupt (1 = edge, 0 = level)
 }
 
-static inline uint32_t tru_hps_gpio_ll_get_pol(void *gpio_base, uint32_t pinnum_bitpos){
-	return TRU_HPS_GPIO_REG(gpio_base)->intpolarity & (1U << pinnum_bitpos);
+static inline uint32_t tru_hps_gpio_get_pol(void *gpio_base, uint32_t pinnum_bitpos){
+	return TRU_HPS_GPIO_REG(gpio_base)->intpolarity & (1 << pinnum_bitpos);
 }
 
-static inline void tru_hps_gpio_ll_toggle_pol(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->intpolarity ^= 1U << pinnum_bitpos;
+static inline void tru_hps_gpio_toggle_pol(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->intpolarity ^= 1 << pinnum_bitpos;
 }
 
-static inline void tru_hps_gpio_ll_clear_int(void *gpio_base, uint32_t pinnum_bitpos){
-	TRU_HPS_GPIO_REG(gpio_base)->intclear |= 1U << pinnum_bitpos;
+static inline void tru_hps_gpio_clear_int(void *gpio_base, uint32_t pinnum_bitpos){
+	TRU_HPS_GPIO_REG(gpio_base)->intclear |= 1 << pinnum_bitpos;
 }
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

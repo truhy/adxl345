@@ -21,16 +21,16 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20251208
+	Version: 20260208
 */
 
-#include "tru_adxl345_ll.h"
+#include "tru_adxl345.h"
 
-#if(TRU_TARGET == TRU_TARGET_C5SOC)
+#if defined(TRU_CFG_CHIPSET) && TRU_CFG_CHIPSET == TRU_OPT_CHIPSET_C5SOC
 
 #include "tru_iom.h"
-#include "c5soc/tru_c5soc_hps_rstmgr_ll.h"
-#include "c5soc/tru_c5soc_hps_i2c_ll.h"
+#include "c5soc/tru_rstmgr_c5soc.h"
+#include "c5soc/tru_i2c_c5soc.h"
 
 // Setup HPS I2C0 controller
 void tru_adxl345_i2c_init(uint32_t l4_sp_clk_freq_hz, uint32_t i2c_dev_speed_khz, uint8_t mode10bit, uint16_t dev_addr){
